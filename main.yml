@@ -1,0 +1,21 @@
+---
+- name: Configure Raspberry Pi instances
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Add default superuser
+      ansible.builtin.user:
+        name: addianto
+        state: present
+    - name: Add SSH public key
+      ansible.posix.authorized_key:
+        user: addianto
+        key: "{{ lookup('file', '~/id_ed25519.pub' }}"
+        state: present
+    - name: Grant sudo to the superuser
+      community.general.sudoers:
+        name: superuser
+        user: addianto
+        nopassword: true
+        state: present
