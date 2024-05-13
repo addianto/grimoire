@@ -1,0 +1,77 @@
+---
+- name: Add Debian 10 backport repository
+  ansible.builtin.apt_repository:
+    repo: deb http://deb.debian.org/debian buster-backports main
+    state: present
+
+- name: Add the APT key for installing Podman
+  ansible.builtin.apt_key:
+    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key
+    state: present
+
+- name: Add Podman repository from Kubic project
+  ansible.builtin.apt_repository:
+    repo: deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /
+    state: present
+    filename: devel:kubic:libcontainers:stable
+
+- name: Install libseccomp2
+  ansible.builtin.apt:
+    name: libseccomp2=2.4.4-1~bpo10+1
+    update_cache: yes
+    force_apt_get: yes
+    state: present
+    default_release: buster-backports
+    install_recommends: no
+
+- name: Install podman
+  ansible.builtin.apt:
+    name:
+      - podman
+    update_cache: yes
+    state: present
+    install_recommends: no
+
+- name: Download Docker Compose
+  # TODO: Try to remember why Docker Compose is required in this task
+  ansible.builtin.get_url:
+    dest: /usr/local/bin/docker-compose
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+    checksum: "sha256:{{ docker_compose_checksum }}"
+    mode: "0755"
+
+- name: Download slirp4netns {{ slirp4netns_version }}
+  ansible.builtin.get_url:
+    dest: /usr/bin/slirp4netns
+    url: "https://github.com/rootless-containers/slirp4netns/releases/download/{{ slirp4netns_version }}/slirp4netns-x86_64"
+    checksum: "sha256:{{ slirp4netns_checksum }}"
+    mode: "0755"
+
+- name: Download fuse-overlayfs {{ fuse_overlayfs_version }}
+  ansible.builtin.get_url:
+    dest: /usr/bin/fuse-overlayfs
+    url: "https://github.com/containers/fuse-overlayfs/releases/download/{{ fuse_overlayfs_version }}/fuse-overlayfs-x86_64"
+    checksum: "sha256:{{ fuse_overlayfs_checksum }}"
+    mode: "0755"
+
+- name: Use 'overlay' as container storage driver
+  ansible.builtin.lineinfile:
+    path: /etc/containers/storage.conf
+    state: present
+    regexp: ^driver = ""$
+    backup: yes
+    line: driver = "overlay"
+
+- name: Use 'fuse-overlayfs' as mount program
+  ansible.builtin.lineinfile:
+    path: /etc/containers/storage.conf
+    state: present
+    regexp: ^#mount_program = "/usr/bin/fuse-overlayfs"$
+    backup: yes
+    line: mount_program = "/usr/bin/fuse-overlayfs"
+
+- name: Update sysctl config to run Podman
+  ansible.builtin.copy:
+    src: sysctl-podman.conf
+    dest: /etc/sysctl.d/podman.conf
+  notify: Reload sysctl

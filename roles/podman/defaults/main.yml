@@ -1,0 +1,9 @@
+---
+docker_compose_version: 1.27.4
+docker_compose_checksum: 04216d65ce0cd3c27223eab035abfeb20a8bef20259398e3b9d9aa8de633286d
+
+slirp4netns_version: v1.1.8
+slirp4netns_checksum: 230a8df9857e83b0f68fa254ecb54a450ed2dbd6dadb54c2c9de890eaca5d68e
+
+fuse_overlayfs_version: v1.3.0
+fuse_overlayfs_checksum: 31224fa334fac9f0dfd4a351a0507055a42ab8455aef36ea48f27a7813ac726d

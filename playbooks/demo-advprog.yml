@@ -1,0 +1,48 @@
+---
+- name: Set up administrator user and minimum system packages
+  hosts: demo
+  vars_prompt:
+    - name: user_username
+      prompt: Provide username for the default, non-root administrator user
+      private: false
+      confirm: true
+    - name: user_password
+      prompt: Provide password for the default, non-root adminstrator user
+      private: true
+      encrypt: sha512_crypt
+      confirm: true
+  roles:
+    - role: common
+    - role: user
+
+- name: Harden server
+  hosts: demo
+  collections:
+    - devsec.hardening
+  roles:
+    - devsec.hardening.os_hardening
+    - devsec.hardening.ssh_hardening
+  vars:
+    sysctl_overwrite:
+      # Enable IPv4 traffic forwarding
+      net.ipv4.ip_forward: 1
+    os_auth_pw_max_age: 99999
+    sftp_enabled: true
+    ssh_server_ports:
+      - "11422"
+    ssh_permit_root_login: "no"
+
+- name: Install Docker
+  hosts: demo
+  roles:
+    - geerlingguy.docker
+  vars:
+    docker_edition: "ce"
+    docker_compose_version: "1.28.4"
+    docker_users:
+      - "{{ user_username }}"
+
+- name: Install node_exporter
+  hosts: demo
+  roles:
+    - geerlingguy.node_exporter

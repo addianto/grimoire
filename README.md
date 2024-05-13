@@ -1,3 +1,3 @@
 # Grimoire
 
-A collection of Ansible playbooks.
+My personal Ansible playbooks.

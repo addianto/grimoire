@@ -1,0 +1,3 @@
+---
+user_username: admin
+user_publickey: "{{ lookup('file', '~/id_ed25519.pub') }}"
