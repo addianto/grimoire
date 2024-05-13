@@ -5,7 +5,6 @@
     - name: user_username
       prompt: Provide username for the default, non-root administrator user
       private: false
-      confirm: true
     - name: user_password
       prompt: Provide password for the default, non-root adminstrator user
       private: true
@@ -29,7 +28,7 @@
     os_auth_pw_max_age: 99999
     sftp_enabled: true
     ssh_server_ports:
-      - "11422"
+      - "22"
     ssh_permit_root_login: "no"
 
 - name: Install Docker

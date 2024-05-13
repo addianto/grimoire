@@ -21,4 +21,5 @@
     name: administrator
     user: "{{ user_username }}"
     nopassword: true
+    commands: ALL
     state: present
